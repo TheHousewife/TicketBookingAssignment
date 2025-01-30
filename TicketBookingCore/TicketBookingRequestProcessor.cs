@@ -12,10 +12,10 @@ namespace TicketBookingCore
         public TicketBookingRequestProcessor(ITicketBookingRepository
         ticketBookingRepository)
         {
-            _ITicket = ticketBookingRepository;
+            _Ticket = ticketBookingRepository;
         }
 
-        private readonly ITicketBookingRepository _ITicket;
+        private readonly ITicketBookingRepository _Ticket;
 
 
         public TicketBookingResponse Book(TicketBookingRequest request)
@@ -25,7 +25,7 @@ namespace TicketBookingCore
             {
                 throw new ArgumentNullException(nameof(request));
             }
-            _ITicket.Save(new TicketBooking
+            _Ticket.Save(new TicketBooking
             {
                 FirstName = request.FirstName,
                 LastName = request.LastName,
