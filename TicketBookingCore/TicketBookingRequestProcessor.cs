@@ -1,41 +1,30 @@
-﻿
-using System.Runtime.CompilerServices;
+﻿using TicketBookingCore;
 
-namespace TicketBookingCore
+public class TicketBookingRequestProcessor
 {
-    public class TicketBookingRequestProcessor
+    private readonly ITicketBookingRepository _ticketBookingRepository;
+
+    public TicketBookingRequestProcessor(ITicketBookingRepository ticketBookingRepository)
     {
+        _ticketBookingRepository = ticketBookingRepository;
+    }
 
-        public TicketBookingRequestProcessor(ITicketBookingRepository
-        ticketBookingRepository)
+    public TicketBookingResponse Book(TicketBookingRequest request)
+    {
+        if (request is null)
         {
-            _Ticket = ticketBookingRepository;
+            throw new ArgumentNullException(nameof(request));
         }
 
-        private readonly ITicketBookingRepository _Ticket;
+        var ticketBooking = TicketBookingMapper.MapToTicketBooking(request);
 
+        _ticketBookingRepository.Save(ticketBooking);
 
-        public TicketBookingResponse Book(TicketBookingRequest request)
+        return new TicketBookingResponse
         {
-
-            if (request is null)
-            {
-                throw new ArgumentNullException(nameof(request));
-            }
-            _Ticket.Save(new TicketBooking
-            {
-                FirstName = request.FirstName,
-                LastName = request.LastName,
-                Email = request.Email
-            });
-            //refractor för att returnera en ny TicketBookingResponse
-            return new TicketBookingResponse
-            {
-                FirstName = request.FirstName,
-                LastName = request.LastName,
-                Email = request.Email
-            };
-            
-        }
+            FirstName = ticketBooking.FirstName,
+            LastName = ticketBooking.LastName,
+            Email = ticketBooking.Email
+        };
     }
 }
