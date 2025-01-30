@@ -1,35 +1,24 @@
 using Moq;
+using System;
+using Xunit;
 
 namespace TicketBookingCore.Tests
 {
     public class TicketBookingRequestProcessorTests
     {
-
-
-        public class TicketBookingRequestProcessorTests
-        {
-            private readonly Mock<ITicketBookingRepository> _ticketBookingRepositoryMock;
-            private readonly TicketBookingRequestProcessor _processor;
-            public TicketBookingRequestProcessorTests()
-            {
-                _ticketBookingRepositoryMock = new Mock<ITicketBookingRepository>();
-                _processor = new
-                TicketBookingRequestProcessor(_ticketBookingRepositoryMock.Object);
-            }
-        }
-
-
+        private readonly Mock<ITicketBookingRepository> _ticketBookingRepositoryMock;
         private readonly TicketBookingRequestProcessor _processor;
+
         public TicketBookingRequestProcessorTests()
         {
-            _processor = new TicketBookingRequestProcessor();
+            _ticketBookingRepositoryMock = new Mock<ITicketBookingRepository>();
+            _processor = new TicketBookingRequestProcessor(_ticketBookingRepositoryMock.Object);
         }
 
         [Fact]
-        public void ShouldReturnTicketBookningResultWithRequestValues()
+        public void ShouldReturnTicketBookingResultWithRequestValues()
         {
             // Arrange
-
             var request = new TicketBookingRequest
             {
                 FirstName = "Mattis",
@@ -46,13 +35,14 @@ namespace TicketBookingCore.Tests
             Assert.Equal(request.LastName, response.LastName);
             Assert.Equal(request.Email, response.Email);
         }
+
         [Fact]
         public void ShouldThrowExceptionIfRequestIsNull()
         {
             // Act
             var exception = Assert.Throws<ArgumentNullException>(() => _processor.Book(null));
 
-            //Assert
+            // Assert
             Assert.Equal("request", exception.ParamName);
         }
 
@@ -60,19 +50,30 @@ namespace TicketBookingCore.Tests
         public void ShouldSaveToDatabase()
         {
             // Arrange
+            TicketBooking savedTicketBooking = null;
+
+            // Setup the Save method to capture the saved ticket booking
+            _ticketBookingRepositoryMock.Setup(x => x.Save(It.IsAny<TicketBooking>()))
+                .Callback<TicketBooking>((ticketBooking) =>
+                {
+                    savedTicketBooking = ticketBooking;
+                });
+
             var request = new TicketBookingRequest
             {
-                FirstName = "Mattis",
-                LastName = "Ericsson Bergman",
-                Email = "mattis@gmail.com"
+                FirstName = "Milena",
+                LastName = "Avramovic",
+                Email = "milenaavramovic@gmail.com"
             };
+
             // Act
             TicketBookingResponse response = _processor.Book(request);
 
-
             // Assert
-
-
+            Assert.NotNull(savedTicketBooking);
+            Assert.Equal(request.FirstName, savedTicketBooking.FirstName);
+            Assert.Equal(request.LastName, savedTicketBooking.LastName);
+            Assert.Equal(request.Email, savedTicketBooking.Email);
         }
     }
 }
